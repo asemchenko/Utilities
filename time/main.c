@@ -1,4 +1,4 @@
-/* this programm VERY approximately measure 
+/* this programm measure 
  * execution time of other programm specified
  * by path.
  * It was written just to explore fork()
@@ -10,7 +10,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
+#include <sys/resource.h>
 
 void readCommandName(char *dst, size_t size) {
 	printf("Input program path: "); fflush(stdout);
@@ -21,9 +21,9 @@ void readCommandName(char *dst, size_t size) {
 
 int main(int argc, char **argv, char **envp) {
 	char commandName[128];
-	readCommandName(commandName, sizeof(commandName)/sizeof(char));
-	time_t startTime = time(0);
+	readCommandName(commandName, sizeof(commandName)/sizeof(char));	
 	pid_t pid = fork();
+	time_t startTime = time(0);
 	if(pid == -1) {
 		fprintf(stderr, "Error during forking: %s\n", strerror(errno));
 		return 1;
@@ -35,7 +35,8 @@ int main(int argc, char **argv, char **envp) {
 		}	
 	}
 	int status;
-	if(waitpid(pid, &status, 0) == -1) {
+	struct rusage r;
+	if(wait4(pid, &status, 0, &r) == -1) {
 		fprintf(stderr, "Unexpected error: %s\n", strerror(errno));
 		return 1;
 	}
@@ -43,7 +44,11 @@ int main(int argc, char **argv, char **envp) {
 	status = WEXITSTATUS(status);
 	if(status) {
 		printf("WARNING: program exited with non-zero status: %d\n", status);
-	} else 
-		printf("Execution time: %lf milliseconds\n", difftime(endTime,startTime)*1000);
+	} else {
+		printf("CPU time(microseconds)		user: %10ld 		system: %10ld\n",
+			       	(long)r.ru_utime.tv_usec,
+			       	(long)r.ru_stime.tv_usec);
+	}
+	printf("Execution time: %lf milliseconds\n", difftime(endTime,startTime)*1000);
 	return status;
 }
