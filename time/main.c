@@ -20,16 +20,19 @@ void readCommandName(char *dst, size_t size) {
 }
 
 int main(int argc, char **argv, char **envp) {
-	char commandName[128];
-	readCommandName(commandName, sizeof(commandName)/sizeof(char));	
+	if (argc < 2) {
+		fprintf(stderr, "Usage: <command> <arguments>...\n");
+		return 1;
+	}
+	char *commandName = argv[1];
+	//readCommandName(commandName, sizeof(commandName)/sizeof(char));	
 	pid_t pid = fork();
 	time_t startTime = time(0);
 	if(pid == -1) {
 		fprintf(stderr, "Error during forking: %s\n", strerror(errno));
 		return 1;
 	} else if(pid == 0) { // <---- child code
-		char *arguments[] = {commandName, NULL};
-		if(execve(commandName, arguments, envp) == -1) {
+		if(execve(commandName, argv+1, envp) == -1) {
 			fprintf(stderr, "Can not execute programm. Error: %s\n", strerror(errno));
 			return 1;
 		}	
@@ -45,10 +48,9 @@ int main(int argc, char **argv, char **envp) {
 	if(status) {
 		printf("WARNING: program exited with non-zero status: %d\n", status);
 	} else {
-		printf("CPU time(microseconds)		user: %10ld 		system: %10ld\n",
-			       	(long)r.ru_utime.tv_usec,
-			       	(long)r.ru_stime.tv_usec);
+		printf("CPU time(microseconds)		 %10ld 		n",
+			       	(long)r.ru_utime.tv_usec);
 	}
-	printf("Execution time: %lf milliseconds\n", difftime(endTime,startTime)*1000);
+//	printf("Execution time: %lf milliseconds\n", difftime(endTime,startTime)*1000);
 	return status;
 }
