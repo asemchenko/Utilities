@@ -14,6 +14,7 @@ try:
 	b = "".join(normalize(bin(int(i))[2:], 8) for i in a.split("."))
 	netPart = b[:p]
 	print("Net addr: %s"%convertToDec(netPart + "0"*(32-p)))
+	print("Net mask: %s"%convertToDec(p*"1" + (32-p)*"0"))
 	print("First addr: %s"%convertToDec(netPart + normalize("1", 32-p)))
 	print("Last addr: %s"%convertToDec(netPart + normalize(bin(2**(32-p)-2)[2:],32-p)))
 except:
