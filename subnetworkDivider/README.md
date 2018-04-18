@@ -9,8 +9,8 @@ Example:
 
 Result:
 
-`
+```
 Network size: 2		192.168.0.0/30
 Network size: 2		192.168.0.4/30
 Network size: 2		192.168.0.8/30
-`
+```
